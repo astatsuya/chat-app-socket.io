@@ -20,6 +20,17 @@ socket.on("message", (message) => {
   $messages.insertAdjacentHTML("beforeend", html);
 });
 
+const locationMessageTemplate = document.querySelector(
+  "#location-message-template"
+).innerHTML;
+
+socket.on("locationMessage", (url) => {
+  const html = Mustache.render(locationMessageTemplate, {
+    url,
+  });
+  $messages.insertAdjacentHTML("beforeend", html);
+});
+
 $messageForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
