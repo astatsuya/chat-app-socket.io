@@ -13,12 +13,19 @@ const messageTemplate = document.querySelector("#message-template").innerHTML;
 const { username, room } = Qs.parse(location.search, {
   ignoreQueryPrefix: true,
 });
-socket.on("Welcome!", () => {
-  console.log("Welcome!");
+socket.on("Welcome!", (message) => {
+  console.log(message);
+  const html = Mustache.render(messageTemplate, {
+    username: message.username,
+    message: message.text,
+    createdAt: moment(message.createdAt).format("h:mm a"),
+  });
+  $messages.insertAdjacentHTML("beforeend", html);
 });
 
 socket.on("message", (message) => {
   const html = Mustache.render(messageTemplate, {
+    username: message.username,
     message: message.text,
     createdAt: moment(message.createdAt).format("h:mm a"),
   });
@@ -29,10 +36,11 @@ const locationMessageTemplate = document.querySelector(
   "#location-message-template"
 ).innerHTML;
 
-socket.on("locationMessage", (url) => {
+socket.on("locationMessage", (message) => {
   const html = Mustache.render(locationMessageTemplate, {
-    url: url.text,
-    createdAt: moment(url.createdAt).format("h:mm a"),
+    username: message.username,
+    url: message.text,
+    createdAt: moment(message.createdAt).format("h:mm a"),
   });
   $messages.insertAdjacentHTML("beforeend", html);
 });
@@ -73,4 +81,9 @@ $sendLocationButton.addEventListener("click", () => {
   });
 });
 
-socket.emit("join", { username, room });
+socket.emit("join", { username, room }, (error) => {
+  if (error) {
+    window.alert(error);
+    location.href = "/";
+  }
+});
